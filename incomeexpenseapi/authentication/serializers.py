@@ -39,6 +39,8 @@ class EmailVerificationSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=60, min_length=6,write_only=True)
     email = serializers.EmailField()
+    username = serializers.CharField(read_only=True)
+    tokens = serializers.CharField(read_only=True)
 
     class Meta:
         model= User
