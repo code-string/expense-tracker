@@ -13,32 +13,31 @@ from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+
 # Create your views here.
 
 
 class RegisterView(generics.GenericAPIView):
-
     serializer_class = RegisterSerializer
 
     def post(self, request):
         user = request.data
-        print("user request object", user)
         serializer = self.serializer_class(data=user)
-        print("serializer", serializer)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         user_data = serializer.data
         user = User.objects.get(email=user_data['email'])
+        # token for user email verification
         token = RefreshToken.for_user(user).access_token
 
-# construct email
+        # construct email
         current_site = get_current_site(request).domain
-        # genrate email view link
+        # generate email view link
         relativeLink = reverse('email-verify')
         absoluteUrl = 'https://' + current_site + \
-            relativeLink + "token=" + str(token)
-        email_body = 'Hi '+user.username + \
-            ' Use link below to verify your email \n' + absoluteUrl
+                      relativeLink + "?token=" + str(token)
+        email_body = 'Hi ' + user.username + \
+                     ' Use link below to verify your email \n' + absoluteUrl
         data = {
             'email_body': email_body,
             'email_to': user.email,
@@ -57,28 +56,28 @@ class VerifyEmail(views.APIView):
 
     @swagger_auto_schema(manual_parameters=[token_param_config])
     def get(self, request):
-        token = request.GET.get('token')
+        token = request.GET.get('token')  # get verification token from url
 
         try:
+            # decode token to get user detail
             payload = jwt.decode(token, settings.SECRET_KEY)
-            user = User.objects.get(id=payload['user_id'])
+            user = User.objects.get(id=payload['user_id'])  # fetch user using token info
             if not user.isverified:
                 user.is_verified = True
                 user.save()
 
             return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
         except jwt.ExpiredSignature as identifier:
-            return Response({"error": "Activationlink expired"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Activation link expired"}, status=status.HTTP_400_BAD_REQUEST)
         except jwt.exceptions.DecodeError as identifier:
             return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginApiView(generics.GenericAPIView):
     serializer_class = LoginSerializer
-   
+
     def post(self, request):
         user = request.data
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
-        # print(serializer.data)
         return Response(data=serializer.data, status=status.HTTP_200_OK)

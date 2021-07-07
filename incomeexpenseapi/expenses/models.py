@@ -1,20 +1,19 @@
 from django.db import models
-from authentication.models import  User
+from authentication.models import User
+
 
 # Create your models here.
 
 
-
 class Expense(models.Model):
-
     CATEGORIES = [
-    ('ONLINE_SERVICES', 'ONLINE_SERVICES'), 
-    ('TRAVEL', 'TRAVEL'),
-    ('FOOD', 'FOOD'),
-    ('TRANSPORT', 'TRANSPORT'),
-    ('RENT', 'RENT'),
-    ('OTHERS', 'OTHERS')
-]
+        ('ONLINE_SERVICES', 'ONLINE_SERVICES'),
+        ('TRAVEL', 'TRAVEL'),
+        ('FOOD', 'FOOD'),
+        ('TRANSPORT', 'TRANSPORT'),
+        ('RENT', 'RENT'),
+        ('OTHERS', 'OTHERS')
+    ]
 
     category = models.CharField(max_length=255, choices=CATEGORIES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)

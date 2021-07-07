@@ -4,6 +4,8 @@ from rest_framework import serializers
 from .models import User
 from django.contrib import auth
 from rest_framework.exceptions import AuthenticationFailed
+
+
 # import pdb
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -37,13 +39,13 @@ class EmailVerificationSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    password = serializers.CharField(max_length=60, min_length=6,write_only=True)
+    password = serializers.CharField(max_length=60, min_length=6, write_only=True)
     email = serializers.EmailField()
     username = serializers.CharField(read_only=True)
     tokens = serializers.CharField(read_only=True)
 
     class Meta:
-        model= User
+        model = User
         fields = ['email', 'password', 'username', 'tokens']
 
     def validate(self, attrs):
@@ -64,4 +66,3 @@ class LoginSerializer(serializers.Serializer):
             'username': user.username,
             'tokens': user.tokens()
         }
-
